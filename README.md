@@ -5,7 +5,7 @@ A Chrome extension that measures ad loading times by monitoring multiple types o
 ## 🚀 Features
 
 - **🚀 Enhanced automatic detection**: Automatically detects multiple types of ads
-  - ⚡ **Xandr**: URLs containing `fastlane.json`
+  - ⚡ **Fastlane**: URLs containing `fastlane.json`
   - 📢 **Google Ads**: URLs containing `gampad/ads`
 - **🚀 Precise measurement**: Calculates time between page initialization and ad detection
 - **🚀 Visual notifications**: Shows detected ad type with differentiated icons
@@ -137,7 +137,7 @@ The extension collects and stores locally:
 
 To test the extension:
 
-1. Visit sites with Google Ads or Xandr ads
+1. Visit sites using Google Ads or Fastlane
 2. Open DevTools (F12) → Network tab
 3. Search for requests containing "fastlane.json"
 4. Verify that the extension detects and measures correctly

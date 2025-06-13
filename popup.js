@@ -13,8 +13,8 @@ function loadCurrentPageData() {
     
     if (response && response.tabData && response.tabData.adLoadTime) {
       // Ad detected
-      const adTypeIcon = response.tabData.adType === 'Xandr' ? '⚡' : '📢';
-      const adTypeText = response.tabData.adType === 'Xandr' ? 'Xandr' : 'Google Ads';
+      const adTypeIcon = response.tabData.adType === 'Fastlane' ? '⚡' : '📢';
+      const adTypeText = response.tabData.adType === 'Fastlane' ? 'Fastlane' : 'Google Ads';
       const navTypeIcon = response.tabData.navigationType === 'spa-navigation' ? '🔄' : '🌐';
       const navTypeText = response.tabData.navigationType === 'spa-navigation' ? 'SPA' : 'Page';
       
@@ -80,8 +80,8 @@ function loadHistory() {
             minute: '2-digit'
           });
           
-          const adTypeIcon = item.adType === 'Xandr' ? '⚡' : '📢';
-          const adTypeText = item.adType === 'Xandr' ? 'Xandr' : 'Google Ads';
+          const adTypeIcon = item.adType === 'Fastlane' ? '⚡' : '📢';
+          const adTypeText = item.adType === 'Fastlane' ? 'Fastlane' : 'Google Ads';
           const navTypeIcon = item.navigationType === 'spa-navigation' ? '🔄' : '🌐';
           const navTypeText = item.navigationType === 'spa-navigation' ? 'SPA' : 'Page';
           
@@ -89,7 +89,7 @@ function loadHistory() {
             <div class="history-item">
               <div class="history-time">${item.adLoadTime}ms</div>
               <div class="history-url">
-                ${new URL(item.url).hostname} ${adTypeIcon} ${adTypeText}
+                ${new URL(item.url).hostname} (${adTypeIcon} ${adTypeText})
               </div>
               <div class="history-date">
                 ${formattedDate} • ${navTypeIcon} ${navTypeText}

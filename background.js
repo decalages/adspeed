@@ -118,7 +118,7 @@ chrome.webRequest.onBeforeRequest.addListener(
           ...relevantData,
           fastlaneTime: currentTime,
           adLoadTime: adLoadTime,
-          adType: details.url.includes('fastlane.json') ? 'Xandr' : 'Google Ads',
+          adType: details.url.includes('fastlane.json') ? 'Fastlane' : 'Google Ads',
           navigationType: navigationType,
           detectionUrl: sourceUrl
         };
@@ -136,7 +136,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             url: sourceUrl,
             adLoadTime: adLoadTime,
             adUrl: details.url,
-            adType: details.url.includes('fastlane.json') ? 'Xandr' : 'Google Ads',
+            adType: details.url.includes('fastlane.json') ? 'Fastlane' : 'Google Ads',
             navigationType: navigationType,
             timestamp: currentTime
           }
@@ -151,7 +151,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             url: sourceUrl,
             adLoadTime: adLoadTime,
             adUrl: details.url,
-            adType: details.url.includes('fastlane.json') ? 'Xandr' : 'Google Ads',
+            adType: details.url.includes('fastlane.json') ? 'Fastlane' : 'Google Ads',
             navigationType: navigationType,
             timestamp: currentTime,
             date: new Date(currentTime).toISOString()
