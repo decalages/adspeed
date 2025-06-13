@@ -1,0 +1,18 @@
+{
+  "name": "ad-speed-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension to measure ad loading times",
+  "scripts": {
+    "build": "echo 'Extension ready to be loaded in Chrome'",
+    "package": "zip -r ad-speed-extension.zip . -x '*.git*' 'node_modules/*' '*.DS_Store' 'package*.json'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "advertising",
+    "performance",
+    "measurement",
+    "fastlane"
+  ],
+  "author": "Stéphane Broquet",
+  "license": "MIT"
+}

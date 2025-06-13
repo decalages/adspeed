@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "🚀 Ad Speed",
+  "version": "1.0.0",
+  "description": "🚀 Measures ad loading speed",
+  "permissions": [
+    "activeTab",
+    "webRequest",
+    "webNavigation",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>", "file://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Ad Speed"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

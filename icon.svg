@@ -1,0 +1,20 @@
+<!-- Icône Ad Speed avec fusée 🚀 -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#FFA500"/>
+
+  <!-- Rocket Body -->
+  <g transform="translate(256, 256) scale(2) translate(-64, -64)">
+    <path d="M64 0C37 24 32 48 32 64c0 16 5 40 32 64 27-24 32-48 32-64 0-16-5-40-32-64z" fill="#ffffff"/>
+    
+    <!-- Window -->
+    <circle cx="64" cy="48" r="8" fill="#00BFFF"/>
+
+    <!-- Flames -->
+    <path d="M60 128c-4 12-8 20-12 24s8 4 16 0 16-8 12-24h-16z" fill="#FF4500"/>
+
+    <!-- Fins -->
+    <path d="M32 80c-12 0-16 16-16 32s8 24 8 24l24-24c-8-8-8-32-16-32z" fill="#FF6347"/>
+    <path d="M96 80c12 0 16 16 16 32s-8 24-8 24l-24-24c8-8 8-32 16-32z" fill="#FF6347"/>
+  </g>
+</svg>
