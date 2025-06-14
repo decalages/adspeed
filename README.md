@@ -1,6 +1,6 @@
 # 🚀 Ad Speed - Chrome Extension
 
-A Chrome extension that measures ad loading times by monitoring multiple types of advertising URLs.
+A Chrome extension that measures the initial response time from ad servers to help optimize ad performance. This extension specifically tracks the first network request to ad servers (not the complete ad rendering time) to provide insights into ad server latency and connection speeds. Perfect for publishers, advertisers, and web developers who need to monitor ad delivery performance and identify potential bottlenecks in their ad serving infrastructure.
 
 ## 🚀 Features
 
