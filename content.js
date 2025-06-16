@@ -79,7 +79,7 @@ function showAdNotification(data) {
       padding: 12px 16px;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 10000;
+      z-index: 2147483647;
       font-family: Arial, sans-serif;
       font-size: 14px;
       max-width: 320px;

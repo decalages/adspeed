@@ -83,7 +83,8 @@ chrome.webRequest.onBeforeRequest.addListener(
     
     // Detect advertising URLs
     const isAdRequest = details.url.includes('fastlane.json') || 
-                       details.url.includes('gampad/ads') 
+                       details.url.includes('gampad/ads') ||
+                       details.url.includes('/dtb/bid?') 
     
     if (isAdRequest) {
       const pageData = pageLoadTimes.get(tabId);
@@ -113,12 +114,24 @@ chrome.webRequest.onBeforeRequest.addListener(
         const currentTime = Date.now();
         const adLoadTime = currentTime - startTime;
         
+        // Determine ad type
+        let adType;
+        if (details.url.includes('fastlane.json')) {
+          adType = 'Fastlane';
+        } else if (details.url.includes('gampad/ads')) {
+          adType = 'Google Ads';
+        } else if (details.url.includes('/dtb/bid?')) {
+          adType = 'Amazon Ads';
+        } else {
+          adType = 'Unknown';
+        }
+        
         // Update data
         const updatedData = {
           ...relevantData,
           fastlaneTime: currentTime,
           adLoadTime: adLoadTime,
-          adType: details.url.includes('fastlane.json') ? 'Fastlane' : 'Google Ads',
+          adType: adType,
           navigationType: navigationType,
           detectionUrl: sourceUrl
         };
@@ -136,7 +149,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             url: sourceUrl,
             adLoadTime: adLoadTime,
             adUrl: details.url,
-            adType: details.url.includes('fastlane.json') ? 'Fastlane' : 'Google Ads',
+            adType: adType,
             navigationType: navigationType,
             timestamp: currentTime
           }
@@ -151,7 +164,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             url: sourceUrl,
             adLoadTime: adLoadTime,
             adUrl: details.url,
-            adType: details.url.includes('fastlane.json') ? 'Fastlane' : 'Google Ads',
+            adType: adType,
             navigationType: navigationType,
             timestamp: currentTime,
             date: new Date(currentTime).toISOString()
