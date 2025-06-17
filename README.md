@@ -45,9 +45,7 @@ zip -r ad-speed-extension.zip . -x "*.git*" "README.md" "*.DS_Store"
 The extension uses multiple mechanisms to detect different types of ads:
 
 1. **WebRequest API**: Intercepts all HTTP/HTTPS requests
-2. **Enhanced pattern matching**: Searches for multiple patterns:
-   - `fastlane.json` - Magnite's FastLane system
-   - `/ads` - Google Ads
+2. **Enhanced pattern matching**: Searches for multiple patterns: Fastlane, Goggle Ads and Amazon ads
 3. **Precise timing**: Measures time from `webNavigation.onBeforeNavigate`
 4. **Automatic classification**: Differentiates FastLane (⚡) from other ads (📢)
 
@@ -65,9 +63,10 @@ The extension uses multiple mechanisms to detect different types of ads:
 
 ### Required permissions
 
-- `activeTab`: Access to active tab
 - `webRequest`: Network request interception
+- `webNavigation`: Page navigation monitoring
 - `storage`: History storage
+- `tabs`: Access to browser tabs
 - `<all_urls>`: Monitoring all sites
 
 ## 🎯 Use cases
