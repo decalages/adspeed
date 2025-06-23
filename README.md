@@ -1,6 +1,6 @@
-# 🚀 Ad Speed - Firefox Extension
+# 🚀 Ad Speed - Chrome and Firefox Extension
 
-A Firefox extension that measures the initial response time from ad servers to help optimize ad performance. This extension specifically tracks the first network request to ad servers (not the complete ad rendering time) to provide insights into ad server latency and connection speeds. Perfect for publishers, advertisers, and web developers who need to monitor ad delivery performance and identify potential bottlenecks in their ad serving infrastructure.
+A Chrome and Firefox extension that measures the initial response time from ad servers to help optimize ad performance. This extension specifically tracks the first network request to ad servers (not the complete ad rendering time) to provide insights into ad server latency and connection speeds. Perfect for publishers, advertisers, and web developers who need to monitor ad delivery performance and identify potential bottlenecks in their ad serving infrastructure.
 
 **Cross-browser compatibility**: This extension works on both Firefox and Chrome using the WebExtensions API.
 
