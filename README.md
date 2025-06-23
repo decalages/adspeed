@@ -1,6 +1,8 @@
-# 🚀 Ad Speed - Chrome Extension
+# 🚀 Ad Speed - Firefox Extension
 
-A Chrome extension that measures the initial response time from ad servers to help optimize ad performance. This extension specifically tracks the first network request to ad servers (not the complete ad rendering time) to provide insights into ad server latency and connection speeds. Perfect for publishers, advertisers, and web developers who need to monitor ad delivery performance and identify potential bottlenecks in their ad serving infrastructure.
+A Firefox extension that measures the initial response time from ad servers to help optimize ad performance. This extension specifically tracks the first network request to ad servers (not the complete ad rendering time) to provide insights into ad server latency and connection speeds. Perfect for publishers, advertisers, and web developers who need to monitor ad delivery performance and identify potential bottlenecks in their ad serving infrastructure.
+
+**Cross-browser compatibility**: This extension works on both Firefox and Chrome using the WebExtensions API.
 
 ## 🚀 Features
 
@@ -15,21 +17,35 @@ A Chrome extension that measures the initial response time from ad servers to he
 
 ## 📦 Installation
 
-### Method 1: Developer mode installation
+### Firefox Installation
+
+#### Method 1: Temporary Installation (Development)
 
 1. Clone or download this repository
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode" in the top right
-4. Click "Load unpacked extension"
-5. Select the `adspeed` folder
-6. The extension is now installed!
+2. Open Firefox and go to `about:debugging`
+3. Click on "This Firefox" in the left sidebar
+4. Click "Load Temporary Add-on..."
+5. Navigate to the extension folder and select the `manifest.json` file
+6. The extension is now installed temporarily!
 
-### Method 2: Package the extension
+#### Method 2: Permanent Installation
 
-```bash
-# Create a ZIP package for distribution
-zip -r ad-speed-extension.zip . -x "*.git*" "README.md" "*.DS_Store"
-```
+1. Package the extension:
+   ```bash
+   npm run package
+   ```
+2. Go to `about:config` and set `xpinstall.signatures.required` to `false`
+3. Go to `about:addons`, click the gear icon and select "Install Add-on From File..."
+4. Select the generated ZIP file
+
+### Chrome Installation (Alternative)
+
+This extension also works on Chrome:
+
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable "Developer mode" in the top right
+3. Click "Load unpacked extension"
+4. Select the extension folder
 
 ## 🔧 Usage
 
@@ -52,8 +68,8 @@ The extension uses multiple mechanisms to detect different types of ads:
 ### Architecture
 
 ```
-├── manifest.json          # Extension configuration
-├── background.js          # Service worker (main logic)
+├── manifest.json          # Extension configuration (Firefox WebExtensions)
+├── background.js          # Background script (Firefox compatible)
 ├── content.js            # Script injected into pages
 ├── popup.html            # User interface
 ├── popup.css             # Popup styles
@@ -112,15 +128,16 @@ The extension collects and stores locally:
 ## 🛠️ Development
 
 ### Prerequisites
-- Chrome/Chromium
+- Firefox or Chrome/Chromium
 - Code editor (VS Code recommended)
 
 ### Code structure
 
 #### background.js
-- Main service worker
+- Background script (works as persistent background page in Firefox)
 - WebRequest and Navigation event management
 - Performance data storage
+- Cross-browser API compatibility (`browser` API for Firefox, `chrome` API for Chrome)
 
 #### content.js
 - Script injected into web pages
@@ -159,8 +176,9 @@ window.addEventListener('adSpeedDetected', console.log);
 - Reload the page completely
 
 ### The popup doesn't open
-- Check that the extension is enabled in chrome://extensions/
-- Restart Chrome if necessary
+- **Firefox**: Check that the extension is enabled in `about:addons`
+- **Chrome**: Check that the extension is enabled in `chrome://extensions/`
+- Restart browser if necessary
 
 ### Missing data
 - History is stored locally and may be lost upon uninstallation
@@ -168,10 +186,12 @@ window.addEventListener('adSpeedDetected', console.log);
 
 ## 📝 Technical notes
 
-- **Manifest V3**: Uses the latest version of Chrome Extensions API
-- **Service Worker**: Replaces background pages for better performance
+- **Manifest V2**: Uses Firefox's preferred manifest version with WebExtensions API
+- **Cross-browser compatibility**: Works on both Firefox and Chrome
+- **Background script**: Uses persistent background page (Firefox) / service worker (Chrome)
 - **Minimal permissions**: Only requests necessary permissions
 - **Optimized performance**: Uses Map() for fast data access
+- **WebExtensions API**: Standard API that works across browsers
 
 ## 🤝 Contributing
 

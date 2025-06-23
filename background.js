@@ -1,10 +1,13 @@
-// Service worker for Ad Speed extension
+// Background script for Ad Speed extension (Firefox compatible)
+// Support both Chrome and Firefox APIs
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 let pageLoadTimes = new Map();
 let fastlaneDetected = new Map();
 let spaNavigationTimes = new Map(); // To track SPA navigations
 
 // Listen for navigation events (complete reloads)
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
+browserAPI.webNavigation.onBeforeNavigate.addListener((details) => {
   if (details.frameId === 0) { // Only for main frame
     const currentTime = Date.now();
     pageLoadTimes.set(details.tabId, {
@@ -22,7 +25,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 });
 
 // Listen for history changes (SPA navigations)
-chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+browserAPI.webNavigation.onHistoryStateUpdated.addListener((details) => {
   if (details.frameId === 0) { // Only for main frame
     const currentTime = Date.now();
     const tabId = details.tabId;
@@ -62,7 +65,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
 });
 
 // Listen for completed navigations to ensure content script is ready
-chrome.webNavigation.onCompleted.addListener((details) => {
+browserAPI.webNavigation.onCompleted.addListener((details) => {
   if (details.frameId === 0) {
     const tabId = details.tabId;
     const pageData = pageLoadTimes.get(tabId);
@@ -76,7 +79,7 @@ chrome.webNavigation.onCompleted.addListener((details) => {
 });
 
 // Listen for web requests to detect ads (fastlane.json or /ads)
-chrome.webRequest.onBeforeRequest.addListener(
+browserAPI.webRequest.onBeforeRequest.addListener(
   (details) => {
     const tabId = details.tabId;
     if (tabId === -1) return; // Ignore requests without tabId
@@ -143,7 +146,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         fastlaneDetected.set(tabId, true);
         
         // Send data to content script
-        chrome.tabs.sendMessage(tabId, {
+        browserAPI.tabs.sendMessage(tabId, {
           type: 'AD_LOAD_TIME',
           data: {
             url: sourceUrl,
@@ -158,7 +161,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         });
         
         // Save to storage
-        chrome.storage.local.get(['adSpeedHistory'], (result) => {
+        browserAPI.storage.local.get(['adSpeedHistory']).then((result) => {
           const history = result.adSpeedHistory || [];
           history.push({
             url: sourceUrl,
@@ -175,7 +178,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             history.splice(0, history.length - 100);
           }
           
-          chrome.storage.local.set({ adSpeedHistory: history });
+          browserAPI.storage.local.set({ adSpeedHistory: history });
         });
       }
     }
@@ -184,16 +187,16 @@ chrome.webRequest.onBeforeRequest.addListener(
 );
 
 // Clean up data when a tab is closed
-chrome.tabs.onRemoved.addListener((tabId) => {
+browserAPI.tabs.onRemoved.addListener((tabId) => {
   pageLoadTimes.delete(tabId);
   fastlaneDetected.delete(tabId);
   spaNavigationTimes.delete(tabId);
 });
 
 // Handle popup messages
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'GET_CURRENT_TAB_DATA') {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    browserAPI.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       if (tabs[0]) {
         const tabData = pageLoadTimes.get(tabs[0].id);
         sendResponse({
@@ -208,14 +211,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   
   if (request.type === 'GET_HISTORY') {
-    chrome.storage.local.get(['adSpeedHistory'], (result) => {
+    browserAPI.storage.local.get(['adSpeedHistory']).then((result) => {
       sendResponse({ history: result.adSpeedHistory || [] });
     });
     return true;
   }
   
   if (request.type === 'CLEAR_HISTORY') {
-    chrome.storage.local.set({ adSpeedHistory: [] }, () => {
+    browserAPI.storage.local.set({ adSpeedHistory: [] }).then(() => {
       sendResponse({ success: true });
     });
     return true;

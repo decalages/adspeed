@@ -1,4 +1,6 @@
-// Content script for Ad Speed
+// Content script for Ad Speed (Firefox compatible)
+// Support both Chrome and Firefox APIs
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 let pageStartTime = Date.now();
 let adDetected = false;
@@ -119,7 +121,7 @@ function showAdNotification(data) {
 }
 
 // Listen for messages from background script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'AD_LOAD_TIME') {
     if (!adDetected) {
       adDetected = true;
@@ -158,7 +160,7 @@ if (document.readyState === 'loading') {
 window.AdSpeed = {
   getLastMeasurement: () => {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({ type: 'GET_CURRENT_TAB_DATA' }, (response) => {
+      browserAPI.runtime.sendMessage({ type: 'GET_CURRENT_TAB_DATA' }, (response) => {
         resolve(response.tabData);
       });
     });

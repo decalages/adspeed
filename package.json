@@ -1,13 +1,14 @@
 {
-  "name": "ad-speed-extension",
+  "name": "ad-speed-extension-firefox",
   "version": "1.0.0",
-  "description": "Chrome extension to measure ad loading times",
+  "description": "Firefox extension to measure ad loading times",
   "scripts": {
-    "build": "echo 'Extension ready to be loaded in Chrome'",
-    "package": "zip -r ad-speed-extension.zip . -x '*.git*' 'node_modules/*' '*.DS_Store' 'package*.json'"
+    "build": "echo 'Extension ready to be loaded in Firefox'",
+    "package": "zip -r ad-speed-extension-firefox.zip . -x '*.git*' 'node_modules/*' '*.DS_Store' 'package*.json'"
   },
   "keywords": [
-    "chrome-extension",
+    "firefox-extension",
+    "webextensions",
     "advertising",
     "performance",
     "measurement",

@@ -1,28 +1,27 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "🚀 Ad Speed",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "🚀 Ad Speed measures the initial response time from ad servers to help optimize ad performance.",
   "permissions": [
     "webRequest",
     "webNavigation",
     "storage",
-    "tabs"
-  ],
-  "host_permissions": [
+    "tabs",
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"],
+    "persistent": true
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>", "file://*/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_start"
     }
   ],
-  "action": {
+  "browser_action": {
     "default_popup": "popup.html",
     "default_title": "Ad Speed"
   },
@@ -30,5 +29,11 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "applications": {
+    "gecko": {
+      "id": "adspeed@stephane.broquet",
+      "strict_min_version": "58.0"
+    }
   }
 }

@@ -1,4 +1,7 @@
-// JavaScript for Ad Speed popup
+// JavaScript for Ad Speed popup (Firefox compatible)
+// Support both Chrome and Firefox APIs
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 document.addEventListener('DOMContentLoaded', function() {
   loadCurrentPageData();
   loadHistory();
@@ -8,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadCurrentPageData() {
-  chrome.runtime.sendMessage({ type: 'GET_CURRENT_TAB_DATA' }, (response) => {
+  browserAPI.runtime.sendMessage({ type: 'GET_CURRENT_TAB_DATA' }, (response) => {
     const currentStatus = document.getElementById('current-status');
     
     if (response && response.tabData && response.tabData.adLoadTime) {
@@ -53,7 +56,7 @@ function loadCurrentPageData() {
 }
 
 function loadHistory() {
-  chrome.runtime.sendMessage({ type: 'GET_HISTORY' }, (response) => {
+  browserAPI.runtime.sendMessage({ type: 'GET_HISTORY' }, (response) => {
     const historyList = document.getElementById('history-list');
     const history = response.history || [];
     
@@ -125,7 +128,7 @@ function updateStats(history) {
 
 function clearHistory() {
   if (confirm('Are you sure you want to clear all history?')) {
-    chrome.runtime.sendMessage({ type: 'CLEAR_HISTORY' }, (response) => {
+    browserAPI.runtime.sendMessage({ type: 'CLEAR_HISTORY' }, (response) => {
       if (response.success) {
         loadHistory(); // Reload display
       }
