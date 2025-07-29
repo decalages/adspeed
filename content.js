@@ -134,29 +134,18 @@ function getNotificationContainer() {
 
 // Show notification when ad is detected
 function showAdNotification(data) {
-  console.log('Ad Speed: showAdNotification called', { 
-    data, 
-    isHydrationComplete, 
-    checkHydrationStatus: checkHydrationStatus(),
-    containerExists: !!getNotificationContainer()
-  });
-  
   // If hydration isn't complete, queue the notification
   if (!isHydrationComplete && !checkHydrationStatus()) {
-    console.log('Ad Speed: Hydration not complete, queuing notification');
     pendingNotifications.push(data);
     return;
   }
   
   const container = getNotificationContainer();
   if (!container) {
-    console.warn('Ad Speed: Cannot create container, queuing notification');
     // If we can't create container, queue for later
     pendingNotifications.push(data);
     return;
   }
-  
-  console.log('Ad Speed: Creating notification element');
   
   // Calculate position for new notification
   const topPosition = calculateNotificationPosition();
@@ -215,18 +204,15 @@ function showAdNotification(data) {
       // Reorganize remaining notifications
       reorganizeNotifications();
     }
-  }, 15000);
+  }, 5000);
 }
 
 // Process any pending notifications after hydration
 function processPendingNotifications() {
   if (pendingNotifications.length > 0) {
-    console.log('Ad Speed: Processing', pendingNotifications.length, 'pending notifications');
     const notifications = [...pendingNotifications];
     pendingNotifications = [];
     notifications.forEach(data => showAdNotification(data));
-  } else {
-    console.log('Ad Speed: No pending notifications to process');
   }
 }
 
@@ -326,7 +312,7 @@ function calculateNotificationPosition() {
   
   // Since we're using relative positioning within the container, 
   // we just return 0 for new notifications (they stack naturally)
-  return 0;
+  return 20;
 }
 
 function reorganizeNotifications() {

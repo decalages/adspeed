@@ -126,12 +126,14 @@ browserAPI.webRequest.onBeforeRequest.addListener(
     // Detect advertising URLs
     const isAdRequest = details.url.includes('fastlane.json') || 
                        details.url.includes('gampad/ads') ||
-                       details.url.includes('/dtb/bid?') 
+                       details.url.includes('/dtb/bid?') ||
+                       details.url.includes('googlesyndication.com/pagead');
     
     if (isAdRequest) {
       const pageData = await getTabData(tabId);
       const spaNavigationTimes = await getStorageData(STORAGE_KEYS.SPA_NAVIGATION_TIMES);
       const spaData = spaNavigationTimes[tabId];
+      const fastlaneStatus = await getFastlaneStatus(tabId);
       
       // Use SPA data if available and more recent, otherwise page data
       let relevantData = pageData;
@@ -153,7 +155,6 @@ browserAPI.webRequest.onBeforeRequest.addListener(
         }
       }
       
-      const fastlaneStatus = await getFastlaneStatus(tabId);
       if (relevantData && !fastlaneStatus) {
         const currentTime = Date.now();
         const adLoadTime = currentTime - startTime;
@@ -166,6 +167,8 @@ browserAPI.webRequest.onBeforeRequest.addListener(
           adType = 'Google Ads';
         } else if (details.url.includes('/dtb/bid?')) {
           adType = 'Amazon Ads';
+        } else if (details.url.includes('googlesyndication.com/pagead')) {
+          adType = 'Google Ads';
         } else {
           adType = 'Unknown';
         }
