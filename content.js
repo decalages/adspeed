@@ -1,6 +1,5 @@
-// Content script for Ad Speed (Firefox compatible)
-// Support both Chrome and Firefox APIs
-const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+// Content script for Ad Speed (Chrome Manifest V3 compatible)
+const browserAPI = chrome;
 
 let pageStartTime = Date.now();
 let adDetected = false;
@@ -14,6 +13,18 @@ function detectSPANavigation() {
     lastUrl = currentUrl;
     pageStartTime = Date.now();
     adDetected = false; // Reset for new SPA "page"
+    
+    // For SPA navigations, we need to ensure our notification system is ready
+    // Reset hydration status for new SPA page but start checking again
+    isHydrationComplete = false;
+    
+    // Check if our container still exists, recreate if needed
+    if (!getNotificationContainer()) {
+      console.warn('Ad Speed: Notification container was lost during SPA navigation, will recreate when needed');
+    }
+    
+    // Restart hydration detection for the new SPA page
+    waitForHydration();
     
     // Don't show notification for SPA navigations
     // Notifications are only shown when ads are detected
@@ -59,21 +70,108 @@ document.addEventListener('click', (event) => {
   }
 }, true);
 
+// Global state for notification management
+let notificationContainer = null;
+let isHydrationComplete = false;
+let pendingNotifications = [];
+let hydrationCheckInterval = null;
+
+// Check if Next.js hydration is complete
+function checkHydrationStatus() {
+  // Multiple indicators that hydration might be complete
+  const indicators = [
+    // Next.js specific indicators
+    window.__NEXT_HYDRATED,
+    document.querySelector('[data-reactroot]'),
+    document.querySelector('#__next'),
+    // React indicators
+    window.React,
+    // General indicators - DOM is stable and interactive
+    document.readyState === 'complete'
+  ];
+  
+  return indicators.some(indicator => indicator) || 
+         // Fallback: if it's been more than 3 seconds since page load
+         (Date.now() - pageStartTime) > 3000;
+}
+
+// Create or get the notification container
+function getNotificationContainer() {
+  if (notificationContainer && notificationContainer.parentNode) {
+    return notificationContainer;
+  }
+  
+  // Create a persistent container that's less likely to be removed by React
+  notificationContainer = document.createElement('div');
+  notificationContainer.id = 'ad-speed-notifications-container';
+  notificationContainer.setAttribute('data-ad-speed-extension', 'true');
+  notificationContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 2147483647;
+    font-family: Arial, sans-serif;
+  `;
+  
+  // Try to append to documentElement first (more stable), fallback to body
+  try {
+    if (document.documentElement) {
+      document.documentElement.appendChild(notificationContainer);
+    } else if (document.body) {
+      document.body.appendChild(notificationContainer);
+    } else {
+      // If neither exists, wait and try again
+      return null;
+    }
+  } catch (error) {
+    console.warn('Ad Speed: Could not create notification container:', error);
+    return null;
+  }
+  
+  return notificationContainer;
+}
+
 // Show notification when ad is detected
 function showAdNotification(data) {
+  console.log('Ad Speed: showAdNotification called', { 
+    data, 
+    isHydrationComplete, 
+    checkHydrationStatus: checkHydrationStatus(),
+    containerExists: !!getNotificationContainer()
+  });
+  
+  // If hydration isn't complete, queue the notification
+  if (!isHydrationComplete && !checkHydrationStatus()) {
+    console.log('Ad Speed: Hydration not complete, queuing notification');
+    pendingNotifications.push(data);
+    return;
+  }
+  
+  const container = getNotificationContainer();
+  if (!container) {
+    console.warn('Ad Speed: Cannot create container, queuing notification');
+    // If we can't create container, queue for later
+    pendingNotifications.push(data);
+    return;
+  }
+  
+  console.log('Ad Speed: Creating notification element');
+  
   // Calculate position for new notification
   const topPosition = calculateNotificationPosition();
   
   // Create notification element
   const notification = document.createElement('div');
   notification.className = 'ad-speed-notification ad-speed-ad-notification';
+  notification.setAttribute('data-ad-speed-notification', 'true');
   
   const adTypeIcon = data.adType === 'Fastlane' ? '⚡' : '📢';
   const navTypeIcon = data.navigationType === 'spa-navigation' ? '🔄' : '🌐';
   
   notification.innerHTML = `
     <div style="
-      position: fixed;
+      position: relative;
       top: ${topPosition}px;
       right: 20px;
       background: linear-gradient(135deg, #FF5722, #FF6B35);
@@ -81,10 +179,10 @@ function showAdNotification(data) {
       padding: 12px 16px;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 2147483647;
-      font-family: Arial, sans-serif;
       font-size: 14px;
       max-width: 320px;
+      margin-bottom: 10px;
+      pointer-events: auto;
       animation: slideIn 0.3s ease-out;
     ">
       <div style="font-weight: bold; margin-bottom: 4px;">🚀 Ad Speed</div>
@@ -108,7 +206,7 @@ function showAdNotification(data) {
     document.head.appendChild(style);
   }
   
-  document.body.appendChild(notification);
+  container.appendChild(notification);
   
   // Remove notification after 5 seconds
   setTimeout(() => {
@@ -117,8 +215,60 @@ function showAdNotification(data) {
       // Reorganize remaining notifications
       reorganizeNotifications();
     }
+  }, 15000);
+}
+
+// Process any pending notifications after hydration
+function processPendingNotifications() {
+  if (pendingNotifications.length > 0) {
+    console.log('Ad Speed: Processing', pendingNotifications.length, 'pending notifications');
+    const notifications = [...pendingNotifications];
+    pendingNotifications = [];
+    notifications.forEach(data => showAdNotification(data));
+  } else {
+    console.log('Ad Speed: No pending notifications to process');
+  }
+}
+
+// Wait for hydration to complete
+function waitForHydration() {
+  // Clear any existing interval to avoid duplicates
+  if (hydrationCheckInterval) {
+    clearInterval(hydrationCheckInterval);
+    hydrationCheckInterval = null;
+  }
+  
+  if (checkHydrationStatus()) {
+    isHydrationComplete = true;
+    processPendingNotifications();
+    return;
+  }
+  
+  // Check periodically for hydration completion
+  hydrationCheckInterval = setInterval(() => {
+    if (checkHydrationStatus()) {
+      isHydrationComplete = true;
+      clearInterval(hydrationCheckInterval);
+      hydrationCheckInterval = null;
+      processPendingNotifications();
+    }
+  }, 100);
+  
+  // Fallback: assume hydration is complete after 5 seconds
+  setTimeout(() => {
+    if (!isHydrationComplete) {
+      isHydrationComplete = true;
+      if (hydrationCheckInterval) {
+        clearInterval(hydrationCheckInterval);
+        hydrationCheckInterval = null;
+      }
+      processPendingNotifications();
+    }
   }, 5000);
 }
+
+// Start waiting for hydration
+waitForHydration();
 
 // Listen for messages from background script
 browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -169,31 +319,29 @@ window.AdSpeed = {
 
 // Utility functions to manage notification positioning
 function calculateNotificationPosition() {
-  const existingNotifications = document.querySelectorAll('.ad-speed-notification');
-  const baseTopPosition = 20;
+  const container = getNotificationContainer();
+  if (!container) return 20;
   
-  // Calculate position based on number of existing notifications
-  const totalHeight = existingNotifications.length * 90; // 90px spacing per notification
+  const existingNotifications = container.querySelectorAll('.ad-speed-notification');
   
-  return baseTopPosition + totalHeight;
+  // Since we're using relative positioning within the container, 
+  // we just return 0 for new notifications (they stack naturally)
+  return 0;
 }
 
 function reorganizeNotifications() {
-  const notifications = document.querySelectorAll('.ad-speed-notification');
-  const baseTopPosition = 20;
+  const container = getNotificationContainer();
+  if (!container) return;
   
-  let currentTop = baseTopPosition;
+  const notifications = container.querySelectorAll('.ad-speed-notification');
   
+  // With the new approach using relative positioning and margin-bottom,
+  // notifications naturally stack, so we don't need to manually reorganize
+  // But we can add a smooth transition if needed
   notifications.forEach((notification, index) => {
-    const notificationDiv = notification.querySelector('div[style*="position: fixed"]');
+    const notificationDiv = notification.querySelector('div');
     if (notificationDiv) {
-      // Update top position in inline style
-      const currentStyle = notificationDiv.style.cssText;
-      const updatedStyle = currentStyle.replace(/top:\s*\d+px/, `top: ${currentTop}px`);
-      notificationDiv.style.cssText = updatedStyle;
-      
-      // Calculate position for next notification (90px spacing)
-      currentTop += 90;
+      notificationDiv.style.transition = 'all 0.3s ease-out';
     }
   });
 }
@@ -203,4 +351,32 @@ window.addEventListener('beforeunload', () => {
   if (urlCheckInterval) {
     clearInterval(urlCheckInterval);
   }
+  if (hydrationCheckInterval) {
+    clearInterval(hydrationCheckInterval);
+  }
 });
+
+// Add a mutation observer to detect if our container gets removed by React/Next.js
+const containerObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'childList') {
+      // Check if our container was removed
+      mutation.removedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && 
+            (node.id === 'ad-speed-notifications-container' || 
+             node.querySelector && node.querySelector('#ad-speed-notifications-container'))) {
+          // Our container was removed, reset it
+          notificationContainer = null;
+        }
+      });
+    }
+  });
+});
+
+// Start observing document changes
+if (document.documentElement) {
+  containerObserver.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test SPA Navigation - Ad Speed</title>
+</head>
+<body>
+    <h1>Test SPA Navigation</h1>
+    <button onclick="simulateNavigation()">Simulate SPA Navigation</button>
+    <button onclick="simulateAdDetection()">Simulate Ad Detection</button>
+    
+    <script>
+        // Simulate SPA navigation
+        function simulateNavigation() {
+            console.log('Simulating SPA navigation...');
+            history.pushState({}, '', '/new-page');
+            console.log('Navigation simulated');
+        }
+        
+        // Simulate ad detection message from background script
+        function simulateAdDetection() {
+            console.log('Simulating ad detection...');
+            // This would normally come from the background script
+            window.dispatchEvent(new CustomEvent('test-ad-detected', {
+                detail: {
+                    url: window.location.href,
+                    adLoadTime: 150,
+                    adUrl: 'https://example.com/fastlane.json',
+                    adType: 'Fastlane',
+                    navigationType: 'spa-navigation',
+                    timestamp: Date.now()
+                }
+            }));
+        }
+        
+        // For testing purposes, simulate the chrome.runtime.onMessage
+        if (typeof chrome === 'undefined') {
+            window.chrome = {
+                runtime: {
+                    onMessage: {
+                        addListener: function(callback) {
+                            window.addEventListener('test-ad-detected', (event) => {
+                                callback({
+                                    type: 'AD_LOAD_TIME',
+                                    data: event.detail
+                                }, null, () => {});
+                            });
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>
+</html>
